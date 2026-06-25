@@ -379,6 +379,7 @@ static ssize_t _hdr_cap_show(struct device *dev,
 	int pos = 0;
 	unsigned int i, j;
 	int hdr10plugsupported = 0;
+	int cuvasupported = 0;
 	const struct cuva_info *cuva = &hdr->cuva_info;
 	const struct hdr10_plus_info *hdr10p = &hdr->hdr10plus_info;
 	const struct sbtm_info *sbtm = &hdr->sbtm_info;
@@ -429,8 +430,11 @@ static ssize_t _hdr_cap_show(struct device *dev,
 
 	pos += snprintf(buf + pos, size - pos, "\n\ncolorimetry_data: %x\n",
 		hdr->colorimetry_support);
+	if (cuva->ieeeoui == CUVA_IEEEOUI)
+		cuvasupported = 1;
+	pos += snprintf(buf + pos, size - pos, "CUVA supported: %d\n",
+		cuvasupported);
 	if (cuva->ieeeoui == CUVA_IEEEOUI) {
-		pos += snprintf(buf + pos, size - pos, "CUVA supported: 1\n");
 		pos += snprintf(buf + pos, size - pos,
 			"  system_start_code: %u\n", cuva->system_start_code);
 		pos += snprintf(buf + pos, size - pos,
