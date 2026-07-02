@@ -167,4 +167,14 @@ int get_hdr_setting(enum hdr_module_sel module_sel,
 				enum hdr_process_sel hdr_process_select,
 				struct hdr_proc_setting_param_s *hdr_params,
 				enum hdr_params_op op);
+
+void set_eotf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
+void set_ootf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
+void set_oetf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
 #endif

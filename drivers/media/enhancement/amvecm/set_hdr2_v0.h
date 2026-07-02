@@ -128,9 +128,7 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 				 struct vinfo_s *vinfo,
 				 struct matrix_s *gmt_mtx,
 				 enum vpp_index_e vpp_index);
-void set_ootf_lut(enum hdr_module_sel module_sel,
-		  struct hdr_proc_lut_param_s *hdr_lut_param,
-		  enum vpp_index_e vpp_index);
+/* set_ootf_lut declared in hdr2_ext.h (included above) */
 extern struct hdr_proc_lut_param_s hdr_lut_param;
 extern int oo_y_lut_hdr_sdr_def[HDR2_OOTF_LUT_SIZE];
 extern int oo_y_lut_hdr_sdr[HDR2_OOTF_LUT_SIZE];

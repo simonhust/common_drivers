@@ -2394,6 +2394,7 @@ void set_eotf_lut(enum hdr_module_sel module_sel,
 	for (i = 0; i < HDR2_EOTF_LUT_SIZE; i++)
 		VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_data_port, lut[i], vpp_sel);
 }
+EXPORT_SYMBOL_GPL(set_eotf_lut);
 
 void set_ootf_lut(enum hdr_module_sel module_sel,
 		  struct hdr_proc_lut_param_s *hdr_lut_param,
@@ -2477,6 +2478,7 @@ void set_ootf_lut(enum hdr_module_sel module_sel,
 			lut[i * 2], vpp_sel);
 	VSYNC_WRITE_VPP_REG_VPP_SEL(ootf_lut_data_port, lut[148], vpp_sel);
 }
+EXPORT_SYMBOL_GPL(set_ootf_lut);
 
 void set_oetf_lut(enum hdr_module_sel module_sel,
 		  struct hdr_proc_lut_param_s *hdr_lut_param,
@@ -2569,6 +2571,7 @@ void set_oetf_lut(enum hdr_module_sel module_sel,
 	else
 		VSYNC_WRITE_VPP_REG_VPP_SEL(oetf_lut_data_port, lut[148], vpp_sel);
 }
+EXPORT_SYMBOL_GPL(set_oetf_lut);
 
 void set_c_gain(enum hdr_module_sel module_sel,
 		struct hdr_proc_lut_param_s *hdr_lut_param,
