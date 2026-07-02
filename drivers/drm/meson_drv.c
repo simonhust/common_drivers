@@ -47,6 +47,8 @@
 #include <linux/amlogic/media/vout/vout_notify.h>
 #include <linux/amlogic/cpu_version.h>
 #include "meson_hdmi.h"
+#include <uapi/amlogic/drm/meson_osd_hdr.h>
+#include <linux/amlogic/media/amvecm/hdr2_ext.h>
 
 #define DRIVER_NAME "meson"
 #define DRIVER_DESC "Amlogic Meson DRM driver"
@@ -141,6 +143,83 @@ int am_meson_get_vrr_range_ioctl(struct drm_device *dev,
 	return 0;
 }
 
+/* OSD HDR LUT unified ioctl - calls amvecm to handle SoC differences */
+extern void set_eotf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
+extern void set_ootf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
+extern void set_oetf_lut(enum hdr_module_sel module_sel,
+			  struct hdr_proc_lut_param_s *hdr_lut_param,
+			  enum vpp_index_e vpp_index);
+
+static int meson_osd_hdr_lut_ioctl(struct drm_device *dev,
+				    void *data, struct drm_file *file_priv)
+{
+	struct drm_meson_osd_hdr_lut *arg = data;
+	struct hdr_proc_lut_param_s lut_param = {};
+	enum hdr_module_sel module_sel;
+
+	if (!arg)
+		return -EINVAL;
+
+	switch (arg->osd_index) {
+	case 0:
+		module_sel = OSD1_HDR;
+		break;
+	case 1:
+		module_sel = OSD2_HDR;
+		break;
+	case 2:
+		module_sel = OSD3_HDR;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	/* SDR = disable all LUTs */
+	if (arg->tf_type == MESON_HDR_TF_SDR) {
+		lut_param.lut_on = LUT_OFF;
+		set_eotf_lut(module_sel, &lut_param, VPP_TOP0);
+		set_oetf_lut(module_sel, &lut_param, VPP_TOP0);
+		set_ootf_lut(module_sel, &lut_param, VPP_TOP0);
+		return 0;
+	}
+
+	lut_param.lut_on = LUT_ON;
+
+	if ((arg->lut_flags & MESON_HDR_LUT_EOTF) && arg->eotf_lut_ptr) {
+		if (copy_from_user(lut_param.eotf_lut,
+				   u64_to_user_ptr(arg->eotf_lut_ptr),
+				   sizeof(lut_param.eotf_lut)))
+			return -EFAULT;
+	}
+
+	if ((arg->lut_flags & MESON_HDR_LUT_OOTF) && arg->ootf_lut_ptr) {
+		if (copy_from_user(lut_param.ogain_lut,
+				   u64_to_user_ptr(arg->ootf_lut_ptr),
+				   sizeof(lut_param.ogain_lut)))
+			return -EFAULT;
+	}
+
+	if ((arg->lut_flags & MESON_HDR_LUT_OETF) && arg->oetf_lut_ptr) {
+		if (copy_from_user(lut_param.oetf_lut,
+				   u64_to_user_ptr(arg->oetf_lut_ptr),
+				   sizeof(lut_param.oetf_lut)))
+			return -EFAULT;
+	}
+
+	if (arg->lut_flags & MESON_HDR_LUT_EOTF)
+		set_eotf_lut(module_sel, &lut_param, VPP_TOP0);
+	if (arg->lut_flags & MESON_HDR_LUT_OOTF)
+		set_ootf_lut(module_sel, &lut_param, VPP_TOP0);
+	if (arg->lut_flags & MESON_HDR_LUT_OETF)
+		set_oetf_lut(module_sel, &lut_param, VPP_TOP0);
+
+	return 0;
+}
+
 static const struct drm_ioctl_desc meson_ioctls[] = {
 	#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	DRM_IOCTL_DEF_DRV(MESON_GEM_CREATE, am_meson_gem_create_ioctl,
@@ -160,7 +239,9 @@ static const struct drm_ioctl_desc meson_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(MESON_CREAT_PRESENT_FENCE,
 			meson_crtc_creat_present_fence_ioctl, 0),
 	#endif
-	DRM_IOCTL_DEF_DRV(MESON_MUTE_PLANE, meson_plane_mute_ioctl, 0)
+	DRM_IOCTL_DEF_DRV(MESON_MUTE_PLANE, meson_plane_mute_ioctl, 0),
+	DRM_IOCTL_DEF_DRV(MESON_OSD_HDR_LUT, meson_osd_hdr_lut_ioctl,
+			  DRM_UNLOCKED | DRM_AUTH)
 };
 
 DEFINE_DRM_GEM_FOPS(meson_drm_fops);

@@ -167,4 +167,9 @@ struct drm_meson_plane_mute {
 #define DRM_IOCTL_MESON_CREAT_PRESENT_FENCE	DRM_IOWR(DRM_COMMAND_BASE + \
 		0x20, struct drm_meson_present_fence)
 
+/*OSD HDR LUT*/
+#include <uapi/amlogic/drm/meson_osd_hdr.h>
+#define DRM_IOCTL_MESON_OSD_HDR_LUT	DRM_IOWR(DRM_COMMAND_BASE + \
+		0x30, struct drm_meson_osd_hdr_lut)
+
 #endif /* _MESON_DRM_H_ */
