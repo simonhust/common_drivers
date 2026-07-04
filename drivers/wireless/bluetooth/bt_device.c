@@ -35,6 +35,8 @@
 #include <linux/amlogic/gki_module.h>
 
 #include <linux/input.h>
+#include <net/net_namespace.h>
+#include <linux/netdevice.h>
 
 #ifdef CONFIG_AMLOGIC_MODIFY
 #include <linux/async.h>
@@ -384,6 +386,7 @@ static void get_btwakeup_irq_work(struct work_struct *work)
 static int bt_set_block(void *data, bool blocked)
 {
 	struct bt_dev_data *pdata = data;
+	struct net_device *dev;
 
 #if IS_ENABLED(CONFIG_AMLOGIC_RFKILL_INIT_SW_UNBLOCK)
 	static bool rfkill_state = true;
@@ -395,6 +398,21 @@ static int bt_set_block(void *data, bool blocked)
 
 	rfkill_state = blocked;
 #endif
+
+	/* When WiFi SDIO operations trigger BT power-off via rfkill,
+	 * skip it if HCI is active to avoid breaking the UART connection.
+	 * This prevents the RTL8852BS combo chip power cycling issue
+	 * where SDIO bus resets disrupt the BT UART link. */
+	if (blocked) {
+		dev = dev_get_by_name(&init_net, "hci0");
+		if (dev && netif_running(dev)) {
+			dev_put(dev);
+			pr_info("BT_RADIO: skip OFF, hci0 active\n");
+			return 0;
+		}
+		if (dev)
+			dev_put(dev);
+	}
 
 	pr_info("BT_RADIO going: %s\n", blocked ? "off" : "on");
 
