@@ -2332,6 +2332,13 @@ void set_eotf_lut(enum hdr_module_sel module_sel,
 		chip_type_id == chip_s6)
 		addr_offset_osd2 = 0x500;
 
+	/* S5/S6/T3X use platform-specific registers/DMA-aware functions */
+	if (is_meson_s5_cpu() || is_meson_t3x_cpu() ||
+	    chip_type_id == chip_s6) {
+		s5_set_eotf_lut(module_sel, hdr_lut_param, vpp_index);
+		return;
+	}
+
 	if (vpp_index == VPP_TOP1 &&
 	    get_cpu_type() == MESON_CPU_MAJOR_ID_T7)
 		vpp_sel = VPP_TOP1;
@@ -2411,6 +2418,13 @@ void set_ootf_lut(enum hdr_module_sel module_sel,
 	if (chip_type_id == chip_s7d ||
 		chip_type_id == chip_s6)
 		addr_offset_osd2 = 0x500;
+
+	/* S5/S6/T3X use platform-specific registers/DMA-aware functions */
+	if (is_meson_s5_cpu() || is_meson_t3x_cpu() ||
+	    chip_type_id == chip_s6) {
+		s5_set_ootf_lut(module_sel, hdr_lut_param, vpp_index);
+		return;
+	}
 
 	if (vpp_index == VPP_TOP1 &&
 	    get_cpu_type() == MESON_CPU_MAJOR_ID_T7)
@@ -2495,6 +2509,13 @@ void set_oetf_lut(enum hdr_module_sel module_sel,
 	if (chip_type_id == chip_s7d ||
 		chip_type_id == chip_s6)
 		addr_offset_osd2 = 0x500;
+
+	/* S5/S6/T3X use platform-specific registers/DMA-aware functions */
+	if (is_meson_s5_cpu() || is_meson_t3x_cpu() ||
+	    chip_type_id == chip_s6) {
+		s5_set_oetf_lut(module_sel, hdr_lut_param, vpp_index);
+		return;
+	}
 
 	if (vpp_index == VPP_TOP1 &&
 	    get_cpu_type() == MESON_CPU_MAJOR_ID_T7)
