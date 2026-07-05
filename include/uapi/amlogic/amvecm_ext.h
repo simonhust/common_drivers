@@ -676,4 +676,30 @@ struct ve_ble_whe_param_s {
 #define AMVECM_IOC_G_CHIP_TYPE      _IOR(_VE_CM, 0x8e, int)
 #define AMVECM_IOC_G_CHIP_ClASS     _IOR(_VE_CM, 0x8f, int)
 
+/* OSD HDR2 LUT configuration for subtitle color space conversion */
+#define OSD_HDR2_EOTF_LUT_SIZE  143
+#define OSD_HDR2_OETF_LUT_SIZE  149
+#define OSD_HDR2_OOTF_LUT_SIZE  149
+
+struct osd_hdr2_lut_s {
+	int module_sel;           /* OSD2_HDR=5, OSD3_HDR=10 */
+	int process_sel;          /* HDR_SDR=2, SDR_HDR=4, HDR_BYPASS=1 */
+	int eotf_en;
+	long long eotf_lut[OSD_HDR2_EOTF_LUT_SIZE];  /* s64 for EOTF */
+	int oetf_en;
+	long long oetf_lut[OSD_HDR2_OETF_LUT_SIZE];  /* s64 for OETF */
+	int ootf_en;
+	int ootf_lut[OSD_HDR2_OOTF_LUT_SIZE];  /* s32 for OOTF */
+	int mtx_in_en;
+	int mtx_in[16];
+	int mtx_out_en;
+	int mtx_out[16];
+	int debug_en;
+	int reserved[8];
+};
+
+#define AMVECM_IOC_S_OSD_HDR2_LUT  _IOW(_VE_CM, 0x90, struct osd_hdr2_lut_s)
+#define AMVECM_IOC_G_OSD_HDR2_LUT  _IOR(_VE_CM, 0x91, struct osd_hdr2_lut_s)
+#define AMVECM_IOC_S_OSD_HDR2_EN   _IOW(_VE_CM, 0x92, int)
+
 #endif

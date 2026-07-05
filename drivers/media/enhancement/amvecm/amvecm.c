@@ -345,6 +345,26 @@ bool wb_en;  /* wb_en enable/disable */
 module_param(wb_en, bool, 0664);
 MODULE_PARM_DESC(wb_en, "\n wb_en\n");
 
+/* OSD HDR2 subtitle color space conversion parameters */
+static int osd_hdr2_en;
+module_param(osd_hdr2_en, int, 0644);
+MODULE_PARM_DESC(osd_hdr2_en, "Enable OSD HDR2 for subtitle: 0=off, 1=on");
+
+static int osd_hdr2_lut_type;
+module_param(osd_hdr2_lut_type, int, 0644);
+MODULE_PARM_DESC(osd_hdr2_lut_type,
+	"OSD HDR2 LUT type: 0=bypass, 1=SDR2PQ, 2=SDR2HLG");
+
+static int osd_hdr2_target;
+module_param(osd_hdr2_target, int, 0644);
+MODULE_PARM_DESC(osd_hdr2_target,
+	"OSD HDR2 target for subtitles: 0=auto, 1=OSD2, 2=OSD3");
+
+static int osd_hdr2_debug_en;
+module_param(osd_hdr2_debug_en, int, 0644);
+MODULE_PARM_DESC(osd_hdr2_debug_en,
+	"Enable OSD HDR2 debug logging: 0=off, 1=on");
+
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
 unsigned int lut3d_long_sec_en = 1;  /* lut3d_long_sec_en enable/disable */
 unsigned int lut3d_compress = 1;  /* lut3d_compress enable/disable */
@@ -4421,6 +4441,92 @@ static long amvecm_ioctl(struct file *file,
 			ret = -EFAULT;
 		break;
 #endif
+	case AMVECM_IOC_S_OSD_HDR2_LUT:
+	{
+		struct osd_hdr2_lut_s osd_param;
+		enum hdr_module_sel mod;
+		struct hdr_proc_lut_param_s lut_param;
+		struct hdr_proc_mtx_param_s mtx_param;
+
+		if (copy_from_user(&osd_param, (void __user *)arg,
+				   sizeof(osd_param))) {
+			ret = -EFAULT;
+			break;
+		}
+
+		mod = (enum hdr_module_sel)osd_param.module_sel;
+		memset(&lut_param, 0, sizeof(lut_param));
+		memset(&mtx_param, 0, sizeof(mtx_param));
+
+		if (osd_hdr2_debug_en)
+			pr_info("osd_hdr2: mod=%d proc=%d eotf=%d oetf=%d\n",
+				osd_param.module_sel, osd_param.process_sel,
+				osd_param.eotf_en, osd_param.oetf_en);
+
+		if (osd_param.eotf_en) {
+			lut_param.lut_on = 1;
+			memcpy(lut_param.eotf_lut, osd_param.eotf_lut,
+			       OSD_HDR2_EOTF_LUT_SIZE * sizeof(s64));
+			set_eotf_lut(mod, &lut_param, VPP_TOP0);
+		}
+
+		if (osd_param.oetf_en) {
+			memcpy(lut_param.oetf_lut, osd_param.oetf_lut,
+			       OSD_HDR2_OETF_LUT_SIZE * sizeof(s64));
+			set_oetf_lut(mod, &lut_param, VPP_TOP0);
+		}
+
+		if (osd_param.ootf_en) {
+			memcpy(lut_param.ogain_lut, osd_param.ootf_lut,
+			       OSD_HDR2_OOTF_LUT_SIZE * sizeof(s32));
+			set_ootf_lut(mod, &lut_param, VPP_TOP0);
+		}
+
+		if (osd_param.mtx_in_en) {
+			memcpy(mtx_param.mtx_in, osd_param.mtx_in,
+			       sizeof(osd_param.mtx_in));
+			set_hdr_matrix(mod, HDR_IN_MTX, &mtx_param,
+				       NULL, NULL, VPP_TOP0);
+		}
+
+		if (osd_param.mtx_out_en) {
+			memcpy(mtx_param.mtx_out, osd_param.mtx_out,
+			       sizeof(osd_param.mtx_out));
+			set_hdr_matrix(mod, HDR_OUT_MTX, &mtx_param,
+				       NULL, NULL, VPP_TOP0);
+		}
+
+		osd_hdr2_en = 1;
+		break;
+	}
+	case AMVECM_IOC_S_OSD_HDR2_EN:
+	{
+		int hdr2_enable;
+
+		if (copy_from_user(&hdr2_enable, (void __user *)arg,
+				   sizeof(int))) {
+			ret = -EFAULT;
+			break;
+		}
+
+		osd_hdr2_en = hdr2_enable;
+
+		if (osd_hdr2_debug_en)
+			pr_info("osd_hdr2: enable=%d\n", hdr2_enable);
+
+		if (!hdr2_enable) {
+			/* disable by writing bypass to LUT */
+			enum hdr_module_sel mod = OSD2_HDR;
+			struct hdr_proc_lut_param_s lut_bypass;
+
+			memset(&lut_bypass, 0, sizeof(lut_bypass));
+			lut_bypass.lut_on = 0;
+			set_eotf_lut(mod, &lut_bypass, VPP_TOP0);
+			set_oetf_lut(mod, &lut_bypass, VPP_TOP0);
+			set_ootf_lut(mod, &lut_bypass, VPP_TOP0);
+		}
+		break;
+	}
 	default:
 		ret = -EINVAL;
 		break;

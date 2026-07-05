@@ -28,6 +28,8 @@
 #include <linux/amlogic/iomap.h>
 #include "amdv.h"
 #include "amdv_regs_s5.h"
+
+extern int osd3_dv_bypass;
 #include "amdv_regs_hw5.h"
 #include "md_config.h"
 
@@ -2691,7 +2693,7 @@ static int dv_core2c_set
 	VSYNC_WR_DV_REG(AMDV_CORE2C_SWAP_CTRL0, osd_enable << 0);
 
 	if (is_aml_s5()) {
-		if (osd_enable) {
+		if (osd_enable && !osd3_dv_bypass) {
 			if (debug_dolby & 2)
 				pr_info("enable core2c\n");
 			VSYNC_WR_DV_REG_BITS
@@ -2700,7 +2702,8 @@ static int dv_core2c_set
 				 4, 1);/*core2c enable*/
 		} else {
 			if (debug_dolby & 2)
-				pr_info("disable core2c\n");
+				pr_info("disable core2c (bypass=%d)\n",
+					osd3_dv_bypass);
 			VSYNC_WR_DV_REG_BITS
 				(OSD_DOLBY_BYPASS_EN,
 				 1,
@@ -4691,8 +4694,8 @@ void enable_amdv_v1(int enable)
 							 1,
 							 0, 1);/*core2a bypass*/
 					}
-					if (get_core2_enable_info(OSD3_INDEX) ||
-						(force_core2c_on && (core2_sel & 2))) {
+					if ((get_core2_enable_info(OSD3_INDEX) ||
+						(force_core2c_on && (core2_sel & 2))) && !osd3_dv_bypass) {
 						pr_info("enable core2c\n");
 						VSYNC_WR_DV_REG_BITS
 							(OSD_DOLBY_BYPASS_EN,
@@ -5704,8 +5707,8 @@ void enable_amdv_v2_stb(int enable)
 							 1,
 							 0, 1);/*core2a bypass*/
 					}
-					if (get_core2_enable_info(OSD3_INDEX) ||
-						(force_core2c_on && (core2_sel & 2))) {
+					if ((get_core2_enable_info(OSD3_INDEX) ||
+						(force_core2c_on && (core2_sel & 2))) && !osd3_dv_bypass) {
 						pr_info("enable core2c\n");
 						VSYNC_WR_DV_REG_BITS
 							(OSD_DOLBY_BYPASS_EN,

@@ -656,6 +656,11 @@ int force_top1_enable;
 module_param(force_top1_enable, int, 0664);
 MODULE_PARM_DESC(force_top1_enable,    "\n force_top1_enable\n");
 
+int osd3_dv_bypass;
+module_param(osd3_dv_bypass, int, 0644);
+MODULE_PARM_DESC(osd3_dv_bypass,
+	"Bypass DV for OSD3: 0=normal DV, 1=bypass DV for subtitle");
+
 static int sdr_transition_delay;
 static int dv_core1_detunnel = 1;
 static bool update_control_path_flag;

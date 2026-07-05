@@ -131,6 +131,18 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 void set_ootf_lut(enum hdr_module_sel module_sel,
 		  struct hdr_proc_lut_param_s *hdr_lut_param,
 		  enum vpp_index_e vpp_index);
+void set_eotf_lut(enum hdr_module_sel module_sel,
+		  struct hdr_proc_lut_param_s *hdr_lut_param,
+		  enum vpp_index_e vpp_index);
+void set_oetf_lut(enum hdr_module_sel module_sel,
+		  struct hdr_proc_lut_param_s *hdr_lut_param,
+		  enum vpp_index_e vpp_index);
+void set_hdr_matrix(enum hdr_module_sel module_sel,
+		    enum hdr_matrix_sel mtx_sel,
+		    struct hdr_proc_mtx_param_s *hdr_mtx_param,
+		    struct hdr10pgen_param_s *p_hdr10pgen_param,
+		    struct hdr_proc_lut_param_s *hdr_lut_param,
+		    enum vpp_index_e vpp_index);
 extern struct hdr_proc_lut_param_s hdr_lut_param;
 extern int oo_y_lut_hdr_sdr_def[HDR2_OOTF_LUT_SIZE];
 extern int oo_y_lut_hdr_sdr[HDR2_OOTF_LUT_SIZE];
