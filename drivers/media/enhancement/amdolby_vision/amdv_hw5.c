@@ -41,6 +41,7 @@
 #include "amdv.h"
 #include "amdv_hw5.h"
 #include "amdv_regs_hw5.h"
+#include "amdv_regs_s5.h"
 #include "mmu_config.h"
 
 #include "dw_data.h"
