@@ -1,0 +1,60 @@
+#include "sc2_s905c2l_ah221_drm.dts"
+#include "coreelec_sc2_common.dtsi"
+
+/ {
+	model = "M-Star";
+	coreelec-dt-id = "sc2_s905c2l_m-star";
+
+	gpio_keypad {
+		status = "disabled";
+	};
+
+	adc_keypad {
+		status = "disabled";
+	};
+
+	auge_sound {
+		/delete-property/ avout_mute-gpios;
+	};
+
+	amhdmitx {
+		vend_data {
+			vendor_name = "M-Star";
+			product_desc = "SC2";
+		};
+	};
+};
+
+&i2c2 {
+	status = "disabled";
+};
+
+&i2c3 {
+	status = "disabled";
+};
+
+&sd_emmc_b {
+	status = "okay";
+	max-frequency = <150000000>;
+};
+
+&aml_wifi {
+	wifi_static_buf = <1>;
+};
+
+&vdin0 {
+	status = "disabled";
+};
+
+&vdin1 {
+	status = "disabled";
+};
+
+&vrtc {
+	status = "disabled";
+};
+
+&sd_emmc_c {
+	mmc-hs400-1_8v;
+	mmc-hs400-enhanced-strobe;
+};
