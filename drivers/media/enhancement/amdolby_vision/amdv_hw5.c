@@ -1326,6 +1326,40 @@ void enable_amdv_hw5(int enable)
 	}
 }
 
+/* Set per-OSD dolby bypass bit in OSD_DOLBY_BYPASS_EN register.
+ * osd_index: 0=OSD1, 1=OSD2, 2=OSD3
+ * bypass: true to bypass dolby, false to restore
+ *
+ * Register OSD_DOLBY_BYPASS_EN (0x6077) is S5-specific.
+ * T3X/S6 SoCs do not have per-OSD dolby bypass — only global DV bypass
+ * via T3X_VD1_S0_DV_BYPASS_CTRL. Function is a no-op on non-S5 SoCs.
+ *
+ * Register OSD_DOLBY_BYPASS_EN (0x6077) layout:
+ *   bit 0: osd1_dolby_bypass_en
+ *   bit 2: osd2_dolby_bypass_en
+ *   bit 4: osd3_dolby_bypass_en
+ *   bit 6: osd4_dolby_bypass_en
+ *   (odd bits are din_ext_mode, leave untouched)
+ */
+void amdv_set_osd_dolby_bypass(int osd_index, bool bypass)
+{
+	u32 bit_pos;
+
+	/* OSD_DOLBY_BYPASS_EN only exists on S5 */
+	if (!is_meson_s5_cpu())
+		return;
+
+	if (osd_index < 0 || osd_index > 3)
+		return;
+
+	/* osd1=bit0, osd2=bit2, osd3=bit4, osd4=bit6 */
+	bit_pos = osd_index * 2;
+
+	VSYNC_WR_DV_REG_BITS(OSD_DOLBY_BYPASS_EN,
+			      bypass ? 1 : 0, bit_pos, 1);
+}
+EXPORT_SYMBOL_GPL(amdv_set_osd_dolby_bypass);
+
 void dolby5_bypass_ctrl(unsigned int en)
 {
 	if (en) {

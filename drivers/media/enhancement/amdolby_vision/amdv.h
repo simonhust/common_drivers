@@ -1190,6 +1190,8 @@ u32 READ_VPP_DV_REG(u32 adr);
 int WRITE_VPP_DV_REG(u32 adr, const u32 val);
 int WRITE_VPP_DV_REG_BITS(u32 adr, const u32 val, u32 start, u32 len);
 
+void amdv_set_osd_dolby_bypass(int osd_index, bool bypass);
+
 int tv_dv_core1_set(u64 *dma_data,
 			     dma_addr_t dma_paddr,
 			     int hsize, int vsize,

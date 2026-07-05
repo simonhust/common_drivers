@@ -17432,6 +17432,27 @@ static ssize_t amdolby_vision_inst_debug_store
 	return count;
 }
 
+/* sysfs: echo "osd_index bypass" > /sys/class/amdolby_vision/osd_dolby_bypass
+ * osd_index: 0=OSD1, 1=OSD2, 2=OSD3, 3=OSD4
+ * bypass: 1=enable bypass, 0=disable bypass
+ * On S5: writes OSD_DOLBY_BYPASS_EN register per-OSD bit
+ * On other SoCs: no-op (OSD2/3 don't go through DV core2)
+ */
+static ssize_t amdolby_vision_osd_dolby_bypass_store
+	 (struct class *cla,
+	  struct class_attribute *attr,
+	  const char *buf, size_t count)
+{
+	int osd_index, bypass;
+
+	if (sscanf(buf, "%d %d", &osd_index, &bypass) != 2)
+		return -EINVAL;
+
+	amdv_set_osd_dolby_bypass(osd_index, !!bypass);
+
+	return count;
+}
+
 static ssize_t dv_video_on_show
 		(struct class *cla,
 		 struct class_attribute *attr,
@@ -17782,6 +17803,8 @@ static struct class_attribute amdolby_vision_class_attrs[] = {
 	__ATTR(dv_video_on, 0644,
 	       dv_video_on_show,
 	       NULL),
+	__ATTR(osd_dolby_bypass, 0220,
+	       NULL, amdolby_vision_osd_dolby_bypass_store),
 	__ATTR_NULL
 };
 
