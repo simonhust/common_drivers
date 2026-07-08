@@ -540,11 +540,17 @@ static int meson_crtc_verify_crc_source(struct drm_crtc *crtc,
 
 static int meson_crtc_enable_vblank(struct drm_crtc *crtc)
 {
+	struct am_meson_crtc *amcrtc = to_am_meson_crtc(crtc);
+
+	amcrtc->vblank_enabled = true;
 	return 0;
 }
 
 static void meson_crtc_disable_vblank(struct drm_crtc *crtc)
 {
+	struct am_meson_crtc *amcrtc = to_am_meson_crtc(crtc);
+
+	amcrtc->vblank_enabled = false;
 }
 
 #ifdef CONFIG_DEBUG_FS

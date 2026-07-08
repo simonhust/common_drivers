@@ -122,6 +122,9 @@ struct am_meson_crtc {
 	/*present fence*/
 	struct am_meson_crtc_present_fence present_fence;
 
+	/*vblank*/
+	bool vblank_enabled;
+
 	/*commit*/
 	struct mutex commit_mutex;
 	atomic_t commit_num;
