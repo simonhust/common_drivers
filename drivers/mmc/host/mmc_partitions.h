@@ -9,7 +9,7 @@
 #include <linux/mmc/mmc.h>
 
 #define     MAX_PART_NAME_LEN               16
-#define     MAX_MMC_PART_NUM                32
+#define     MAX_MMC_PART_NUM                48
 
 /* MMC Partition Table */
 #define     MMC_PARTITIONS_MAGIC            "MPT"
