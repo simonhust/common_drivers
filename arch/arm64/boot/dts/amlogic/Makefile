@@ -102,6 +102,7 @@ dtb-y += sc2_s905x4_x96_x4_2g.dtb
 dtb-y += sc2_s905x4_x96_x4_2g_1gbit.dtb
 dtb-y += sc2_s905x4_x96_x4_4g.dtb
 dtb-y += sc2_s905x4_x96_x4_4g_1gbit.dtb
+dtb-y += sc2_s905c2l_2g.dtb
 dtb-y += t7_a311d2_beelink_gt_king_ii_4g.dtb
 dtb-y += t7_a311d2_beelink_gt_king_ii_8g.dtb
 dtb-y += t7_a311d2_khadas_vim4.dtb
