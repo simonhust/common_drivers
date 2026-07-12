@@ -4459,10 +4459,11 @@ static long amvecm_ioctl(struct file *file,
 		memset(&mtx_param, 0, sizeof(mtx_param));
 
 		// Enable HDR2 clock gate before any LUT register writes.
-		// set_hdr_matrix(HDR_IN_MTX) enables the clock gate;
-		// without it, writing LUT registers on some SoCs (e.g. SC2)
-		// hangs the bus because the HDR2 module is powered down.
+		// set_hdr_matrix() opens the clock gate only when mtx_on=1;
+		// without the clock gate, LUT register writes hang the bus on SC2.
 		mtx_param.p_sel = (enum hdr_process_sel)osd_param.process_sel;
+		mtx_param.mtx_on = 1;
+		mtx_param.mtx_only = MTX_ONLY;
 		set_hdr_matrix(mod, HDR_IN_MTX, &mtx_param,
 			       NULL, NULL, VPP_TOP0);
 
