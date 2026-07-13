@@ -2390,10 +2390,10 @@ void set_eotf_lut(enum hdr_module_sel module_sel,
 	if (!hdr_lut_param->lut_on)
 		return;
 
-	VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_addr_port, 0x0, vpp_sel);
-	for (i = 0; i < HDR2_EOTF_LUT_SIZE; i++)
-		VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_data_port, lut[i], vpp_sel);
-}
+ 	VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_addr_port, 0x0, vpp_sel);
+ 	for (i = 0; i < HDR2_EOTF_LUT_SIZE; i++)
+ 		VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_data_port, lut[i], vpp_sel);
+ }
 
 void set_ootf_lut(enum hdr_module_sel module_sel,
 		  struct hdr_proc_lut_param_s *hdr_lut_param,
