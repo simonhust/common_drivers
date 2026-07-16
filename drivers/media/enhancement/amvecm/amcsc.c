@@ -5988,9 +5988,9 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 				hdr_func(OSD1_HDR,
 					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 				hdr_func(OSD2_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 				hdr_func(OSD3_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 			}
 			pr_csc(1, "\t osd sdr->hdr/hlg\n");
 		} else {
