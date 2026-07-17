@@ -3107,7 +3107,12 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 	/* s5 do not have osd2 hdr and matrix */
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_t3x &&
@@ -4778,7 +4783,12 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 	/* t5w do not have osd hdr, but osd1/2/3 hdr matrix is used*/
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_s7d &&
@@ -4786,7 +4796,12 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 			return hdr_process_select;
 		break;
 	case OSD3_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T7 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m)

@@ -47,7 +47,6 @@
 #include <linux/amlogic/media/vout/vout_notify.h>
 #include <linux/amlogic/media/amvecm/hdr2_ext.h>
 #include <linux/amlogic/media/amvecm/amvecm.h>
-#include <linux/amlogic/media/amdolbyvision/dolby_vision.h>
 #include <linux/amlogic/cpu_version.h>
 #include "meson_hdmi.h"
 
@@ -184,18 +183,27 @@ static int meson_osd_hdr_lut_ioctl(struct drm_device *dev,
 		return -EINVAL;
 	}
 
-	/* For DV OSD, RGB_OSD is handled internally by hdr_func based on
-	 * is_amdv_on(). Mask it out here to avoid conflict; hdr_func will
-	 * set RGB_OSD only when DV is off.
+	/* Note: RGB_OSD flag is managed by hdr_func() internally based on
+	 * is_amdv_on() state. Do not strip it here — hdr_func() will add
+	 * it when DV is off and skip it when DV is on.
 	 */
-	if (is_amdv_on())
-		process_select &= ~RGB_OSD;
 
 	/* hdr_set() -> hdr_func() handles full HDR2 pipeline:
 	 * matrix (IN/GAMUT/OUT) + EOTF/OETF/OOTF LUT + cgain + hist.
 	 * S5 uses s5_set_* variants internally.
+	 *
+	 * On T7/T3, OSD1 is on VPP_TOP0 and OSD3 is on VPP_TOP1.
+	 * All other SoCs use VPP_TOP0 for OSD modules.
+	 * hdr_func() silently returns on module/vpp mismatch, so we must
+	 * select the correct vpp_index here to avoid bypass.
 	 */
-	hdr_set(arg->module_sel, process_select, VPP_TOP0);
+	enum vpp_index_e vpp_idx = VPP_TOP0;
+
+	if (arg->module_sel == OSD3_HDR &&
+	    (is_meson_t7_cpu() || is_meson_t3_cpu()))
+		vpp_idx = VPP_TOP1;
+
+	hdr_set(arg->module_sel, process_select, vpp_idx);
 
 	DRM_DEBUG("%s: module=%u process=%u\n", __func__,
 		  arg->module_sel, arg->process_select);
