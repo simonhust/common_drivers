@@ -411,7 +411,7 @@ unsigned int pre_aiclr_en = 1;
 #endif
 
 unsigned int hdr_output_mode;
-module_param(hdr_output_mode, uint, 0664);
+module_param(hdr_output_mode, uint, 0644);
 MODULE_PARM_DESC(hdr_output_mode, "\n hdr_output_mode\n");
 
 unsigned int data_path;  /* 0:main;1:sub */

@@ -702,28 +702,28 @@ MODULE_PARM_DESC(hdr_mode, "\n set hdr_mode\n");
 /* 4:hdr->cuva_hlg*/
 uint hdr_process_mode[VD_PATH_MAX];
 uint cur_hdr_process_mode[VD_PATH_MAX] = {PROC_OFF, PROC_OFF, PROC_OFF};
-module_param_array(hdr_process_mode, uint, &vd_path_max, 0444);
+module_param_array(hdr_process_mode, uint, &vd_path_max, 0644);
 MODULE_PARM_DESC(hdr_process_mode, "\n current hdr_process_mode\n");
 
 /* 0:bypass, 1:hdr10p->hdr, 2:hdr10p->sdr, 3:hdr10p->hlg */
 /* 4:hdr10p->cuva, 5:hdr10p->cuva_hlg*/
 uint hdr10_plus_process_mode[VD_PATH_MAX];
 uint cur_hdr10_plus_process_mode[VD_PATH_MAX] = {PROC_OFF, PROC_OFF, PROC_OFF};
-module_param_array(hdr10_plus_process_mode, uint, &vd_path_max, 0444);
+module_param_array(hdr10_plus_process_mode, uint, &vd_path_max, 0644);
 MODULE_PARM_DESC(hdr10_plus_process_mode, "\n current hdr10_plus_process_mode\n");
 
 /* 0:hlg->hlg, 1:hlg->sdr 2:hlg->hdr, 3:hlg->cuva*/
 /* 4:hdr->cuva_hlg*/
 uint hlg_process_mode[VD_PATH_MAX];
 uint cur_hlg_process_mode[VD_PATH_MAX] = {PROC_OFF, PROC_OFF, PROC_OFF};
-module_param_array(hlg_process_mode, uint, &vd_path_max, 0444);
+module_param_array(hlg_process_mode, uint, &vd_path_max, 0644);
 MODULE_PARM_DESC(hlg_process_mode, "\n current hlg_process_mode\n");
 
 /* 0:bypass, 1:cuva->sdr, 2:cuva->hdr, 3:cuva->hlg */
 /* 4:cuva->hdr10p, 5:cuva->cuva_hlg*/
 uint cuva_hdr_process_mode[VD_PATH_MAX];
 uint cur_cuva_hdr_process_mode[VD_PATH_MAX] = {PROC_OFF, PROC_OFF, PROC_OFF};
-module_param_array(cuva_hdr_process_mode, uint, &vd_path_max, 0444);
+module_param_array(cuva_hdr_process_mode, uint, &vd_path_max, 0644);
 MODULE_PARM_DESC(cuva_hdr_process_mode, "\n current cuva_hdr_process_mode\n");
 
 /* 0:bypass, 1:cuva_hlg->sdr, 2:cuva_hlg->hdr, 3:cuva_hlg->hlg */
