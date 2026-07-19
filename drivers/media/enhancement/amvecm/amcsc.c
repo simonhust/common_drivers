@@ -730,7 +730,7 @@ MODULE_PARM_DESC(cuva_hdr_process_mode, "\n current cuva_hdr_process_mode\n");
 /* 4:cuva_hlg->hdr, 5:cuva_hlg->cuva*/
 uint cuva_hlg_process_mode[VD_PATH_MAX];
 uint cur_cuva_hlg_process_mode[VD_PATH_MAX] = {PROC_OFF, PROC_OFF, PROC_OFF};
-module_param_array(cuva_hlg_process_mode, uint, &vd_path_max, 0444);
+module_param_array(cuva_hlg_process_mode, uint, &vd_path_max, 0644);
 MODULE_PARM_DESC(cuva_hlg_process_mode, "\n current cuva_hlg_process_mode\n");
 
 /* 0: tx don't support hdr10+, 1: tx support hdr10+*/
