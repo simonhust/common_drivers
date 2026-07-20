@@ -167,4 +167,19 @@ struct drm_meson_plane_mute {
 #define DRM_IOCTL_MESON_CREAT_PRESENT_FENCE	DRM_IOWR(DRM_COMMAND_BASE + \
 		0x20, struct drm_meson_present_fence)
 
+/* OSD HDR LUT */
+#define MESON_HDR_PROC_BYPASS		0
+#define MESON_HDR_PROC_SDR_HDR		1
+#define MESON_HDR_PROC_SDR_HLG		2
+#define MESON_HDR_PROC_SDR_CUVA		3
+
+struct drm_meson_osd_hdr_lut {
+	__u32 module_sel;	/* hdr_module_sel: OSD1_HDR=4, OSD2_HDR=5, OSD3_HDR=10 */
+	__u32 process_select;	/* MESON_HDR_PROC_* */
+	__u32 reserved[2];
+};
+
+#define DRM_IOCTL_MESON_OSD_HDR_LUT	DRM_IOWR(DRM_COMMAND_BASE + \
+		0x30, struct drm_meson_osd_hdr_lut)
+
 #endif /* _MESON_DRM_H_ */

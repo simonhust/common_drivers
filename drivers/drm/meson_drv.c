@@ -45,6 +45,8 @@
 #include "meson_plane.h"
 #include <linux/amlogic/media/osd/osd_logo.h>
 #include <linux/amlogic/media/vout/vout_notify.h>
+#include <linux/amlogic/media/amvecm/hdr2_ext.h>
+#include <linux/amlogic/media/amvecm/amvecm.h>
 #include <linux/amlogic/cpu_version.h>
 #include "meson_hdmi.h"
 
@@ -141,6 +143,73 @@ int am_meson_get_vrr_range_ioctl(struct drm_device *dev,
 	return 0;
 }
 
+extern u32 hdr_set(u32 module_sel, u32 hdr_process_select,
+		   enum vpp_index_e vpp_index);
+
+static int meson_osd_hdr_lut_ioctl(struct drm_device *dev,
+				   void *data, struct drm_file *file_priv)
+{
+	struct drm_meson_osd_hdr_lut *arg = data;
+	u32 process_select;
+
+	if (!arg) {
+		DRM_ERROR("%s: para is NULL!\n", __func__);
+		return -EINVAL;
+	}
+
+	if (arg->module_sel != OSD1_HDR &&
+	    arg->module_sel != OSD2_HDR &&
+	    arg->module_sel != OSD3_HDR) {
+		DRM_ERROR("%s: invalid module_sel %u\n", __func__, arg->module_sel);
+		return -EINVAL;
+	}
+
+	switch (arg->process_select) {
+	case MESON_HDR_PROC_BYPASS:
+		process_select = HDR_BYPASS;
+		break;
+	case MESON_HDR_PROC_SDR_HDR:
+		process_select = SDR_HDR | RGB_OSD;
+		break;
+	case MESON_HDR_PROC_SDR_HLG:
+		process_select = SDR_HLG | RGB_OSD;
+		break;
+	case MESON_HDR_PROC_SDR_CUVA:
+		process_select = SDR_CUVA | RGB_OSD;
+		break;
+	default:
+		DRM_ERROR("%s: invalid process_select %u\n", __func__,
+			  arg->process_select);
+		return -EINVAL;
+	}
+
+	/* Note: RGB_OSD flag is managed by hdr_func() internally based on
+	 * is_amdv_on() state. Do not strip it here — hdr_func() will add
+	 * it when DV is off and skip it when DV is on.
+	 */
+
+	/* hdr_set() -> hdr_func() handles full HDR2 pipeline:
+	 * matrix (IN/GAMUT/OUT) + EOTF/OETF/OOTF LUT + cgain + hist.
+	 * S5 uses s5_set_* variants internally.
+	 *
+	 * On T7/T3, OSD1 is on VPP_TOP0 and OSD3 is on VPP_TOP1.
+	 * All other SoCs use VPP_TOP0 for OSD modules.
+	 * hdr_func() silently returns on module/vpp mismatch, so we must
+	 * select the correct vpp_index here to avoid bypass.
+	 */
+	enum vpp_index_e vpp_idx = VPP_TOP0;
+
+	if (arg->module_sel == OSD3_HDR &&
+	    (is_meson_t7_cpu() || is_meson_t3_cpu()))
+		vpp_idx = VPP_TOP1;
+
+	hdr_set(arg->module_sel, process_select, vpp_idx);
+
+	DRM_DEBUG("%s: module=%u process=%u\n", __func__,
+		  arg->module_sel, arg->process_select);
+	return 0;
+}
+
 static const struct drm_ioctl_desc meson_ioctls[] = {
 	#ifdef CONFIG_AMLOGIC_DRM_USE_ION
 	DRM_IOCTL_DEF_DRV(MESON_GEM_CREATE, am_meson_gem_create_ioctl,
@@ -160,7 +229,9 @@ static const struct drm_ioctl_desc meson_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(MESON_CREAT_PRESENT_FENCE,
 			meson_crtc_creat_present_fence_ioctl, 0),
 	#endif
-	DRM_IOCTL_DEF_DRV(MESON_MUTE_PLANE, meson_plane_mute_ioctl, 0)
+	DRM_IOCTL_DEF_DRV(MESON_MUTE_PLANE, meson_plane_mute_ioctl, 0),
+	DRM_IOCTL_DEF_DRV(MESON_OSD_HDR_LUT, meson_osd_hdr_lut_ioctl,
+			  DRM_UNLOCKED | DRM_AUTH)
 };
 
 DEFINE_DRM_GEM_FOPS(meson_drm_fops);
@@ -213,7 +284,6 @@ static struct drm_driver meson_driver = {
 	.date			= "20220603",
 	.major			= MESON_VERSION_MAJOR,
 	.minor			= MESON_VERSION_MINOR,
-	.minor			= 0,
 };
 
 static int meson_worker_thread_init(struct meson_drm *priv,

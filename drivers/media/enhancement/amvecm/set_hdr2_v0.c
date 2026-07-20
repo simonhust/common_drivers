@@ -2390,10 +2390,10 @@ void set_eotf_lut(enum hdr_module_sel module_sel,
 	if (!hdr_lut_param->lut_on)
 		return;
 
-	VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_addr_port, 0x0, vpp_sel);
-	for (i = 0; i < HDR2_EOTF_LUT_SIZE; i++)
-		VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_data_port, lut[i], vpp_sel);
-}
+ 	VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_addr_port, 0x0, vpp_sel);
+ 	for (i = 0; i < HDR2_EOTF_LUT_SIZE; i++)
+ 		VSYNC_WRITE_VPP_REG_VPP_SEL(eotf_lut_data_port, lut[i], vpp_sel);
+ }
 
 void set_ootf_lut(enum hdr_module_sel module_sel,
 		  struct hdr_proc_lut_param_s *hdr_lut_param,
@@ -3107,7 +3107,12 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 	/* s5 do not have osd2 hdr and matrix */
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_t3x &&
@@ -3340,7 +3345,12 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 			for (i = 0; i < HDR2_OETF_LUT_SIZE; i++) {
 				hdr_lut_param.oetf_lut[i]  = oe_y_lut_hdr[i];
 				if (sbtm_en && sbtm_mode) {
-					hdr_lut_param.ogain_lut[i] = oo_y_lut_sbtm[i];
+					if (module_sel == OSD1_HDR ||
+					    module_sel == OSD2_HDR ||
+					    module_sel == OSD3_HDR)
+						hdr_lut_param.ogain_lut[i] = oo_y_lut_sbtm_osd[i];
+					else
+						hdr_lut_param.ogain_lut[i] = oo_y_lut_sbtm[i];
 					if (i == 0)
 						pr_csc(12, "%s sbtm:SDR_HDR. oo_lut[10]= %d\n",
 							__func__, oo_y_lut_sbtm[10]);
@@ -4773,7 +4783,12 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 	/* t5w do not have osd hdr, but osd1/2/3 hdr matrix is used*/
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_s7d &&
@@ -4781,7 +4796,12 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 			return hdr_process_select;
 		break;
 	case OSD3_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T7 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m)
