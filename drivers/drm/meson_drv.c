@@ -146,6 +146,9 @@ int am_meson_get_vrr_range_ioctl(struct drm_device *dev,
 extern u32 hdr_set(u32 module_sel, u32 hdr_process_select,
 		   enum vpp_index_e vpp_index);
 
+extern u32 hdr_set_osd2_direct(u32 module_sel, u32 hdr_process_select,
+			       enum vpp_index_e vpp_index);
+
 static int meson_osd_hdr_lut_ioctl(struct drm_device *dev,
 				   void *data, struct drm_file *file_priv)
 {
@@ -203,7 +206,19 @@ static int meson_osd_hdr_lut_ioctl(struct drm_device *dev,
 	    (is_meson_t7_cpu() || is_meson_t3_cpu()))
 		vpp_idx = VPP_TOP1;
 
-	hdr_set(arg->module_sel, process_select, vpp_idx);
+	/*
+	 * G12A/G12B/SM1/SC2/S4 do not have OSD2_HDR in the hdr_func
+	 * whitelist (hdr_func returns early for these SoCs).
+	 * Use hdr_set_osd2_direct() to bypass the whitelist check
+	 * and configure OSD2_HDR2 registers directly.
+	 */
+	if (arg->module_sel == OSD2_HDR &&
+	    (is_meson_g12a_cpu() || is_meson_g12b_cpu() ||
+	     is_meson_sm1_cpu() || is_meson_sc2_cpu() ||
+	     is_meson_s4_cpu()))
+		hdr_set_osd2_direct(arg->module_sel, process_select, vpp_idx);
+	else
+		hdr_set(arg->module_sel, process_select, vpp_idx);
 
 	DRM_DEBUG("%s: module=%u process=%u\n", __func__,
 		  arg->module_sel, arg->process_select);

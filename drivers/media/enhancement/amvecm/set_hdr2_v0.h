@@ -86,6 +86,9 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 			      struct matrix_s *gmt_mtx,
 			      enum vpp_index_e vpp_index);
 
+u32 hdr_set_osd2_direct(u32 module_sel, u32 hdr_process_select,
+			enum vpp_index_e vpp_index);
+
 enum mtx_csc_e {
 	MATRIX_NULL = 0,
 	MATRIX_RGB_YUV601 = 0x1,

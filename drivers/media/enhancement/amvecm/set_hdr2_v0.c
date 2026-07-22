@@ -46,8 +46,12 @@
 #include "arch/vpp_s7d_sr_regs.h"
 
 u32 disable_flush_flag;
+
 module_param(disable_flush_flag, uint, 0664);
 MODULE_PARM_DESC(disable_flush_flag, "\n disable_flush_flag\n");
+
+/* flag to bypass whitelist check for OSD2_HDR in hdr_func */
+static bool osd2_whitelist_bypass;
 
 // sdr to hdr table  12bit
 int cgain_lut0[HDR2_CGAIN_LUT_SIZE] = {
@@ -3107,12 +3111,8 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 	/* s5 do not have osd2 hdr and matrix */
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (!osd2_whitelist_bypass &&
+		    get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_t3x &&
@@ -4553,6 +4553,22 @@ u32 hdr_set(u32 module_sel, u32 hdr_process_select, enum vpp_index_e vpp_index)
 }
 EXPORT_SYMBOL(hdr_set);
 
+u32 hdr_set_osd2_direct(u32 module_sel, u32 hdr_process_select,
+			 enum vpp_index_e vpp_index)
+{
+	u32 ret;
+
+#ifndef CONFIG_AMLOGIC_ZAPPER_CUT
+	osd2_whitelist_bypass = true;
+	ret = hdr_func(module_sel, hdr_process_select, NULL, NULL, vpp_index);
+	osd2_whitelist_bypass = false;
+	return ret;
+#else
+	return 0;
+#endif
+}
+EXPORT_SYMBOL(hdr_set_osd2_direct);
+
 #ifndef CONFIG_AMLOGIC_ZAPPER_CUT
 int hdr10p_ebzcurve_update(enum hdr_module_sel module_sel,
 			   enum hdr_process_sel hdr_process_select,
@@ -4783,12 +4799,7 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 	/* t5w do not have osd hdr, but osd1/2/3 hdr matrix is used*/
 	switch (module_sel) {
 	case OSD2_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
 			chip_type_id != chip_t5m &&
 			chip_type_id != chip_s7d &&
@@ -4796,14 +4807,10 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 			return hdr_process_select;
 		break;
 	case OSD3_HDR:
-		if (get_cpu_type() != MESON_CPU_MAJOR_ID_G12A &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_G12B &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SM1 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_SC2 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_S4 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
+		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T7 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S5 &&
 			chip_type_id != chip_t5m)
 			return hdr_process_select;
 		break;
@@ -5130,7 +5137,8 @@ int cuva_hdr_update(enum hdr_module_sel module_sel,
 	case OSD3_HDR:
 		if (get_cpu_type() != MESON_CPU_MAJOR_ID_T3 &&
 			get_cpu_type() != MESON_CPU_MAJOR_ID_T7 &&
-			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W)
+			get_cpu_type() != MESON_CPU_MAJOR_ID_T5W &&
+			get_cpu_type() != MESON_CPU_MAJOR_ID_S5)
 			return hdr_process_select;
 		break;
 	case VD3_HDR:
