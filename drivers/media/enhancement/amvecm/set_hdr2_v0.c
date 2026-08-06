@@ -3267,7 +3267,8 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 		   hdr_process_select & CUVA_BYPASS ||
 		   hdr_process_select & CUVAHLG_HLG ||
 		   hdr_process_select & CUVAHLG_CUVA ||
-		   (module_sel == OSD1_HDR && osd_pq_bypass)) {
+		   (module_sel == OSD1_HDR && osd_pq_bypass) ||
+		   (module_sel == OSD1_HDR && osd1_hdr_mode)) {
 		for (i = 0; i < HDR2_OETF_LUT_SIZE; i++) {
 			hdr_lut_param.oetf_lut[i] = oe_y_lut_bypass[i];
 			hdr_lut_param.ogain_lut[i] = oo_y_lut_bypass[i];
