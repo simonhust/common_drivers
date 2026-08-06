@@ -792,6 +792,10 @@ static uint hdr2_debug;
 module_param(hdr2_debug, uint, 0664);
 MODULE_PARM_DESC(hdr2_debug, "\n hdr2_debug\n");
 
+static bool osd_pq_bypass;
+module_param(osd_pq_bypass, bool, 0664);
+MODULE_PARM_DESC(osd_pq_bypass, "\n osd_pq_bypass\n");
+
 static uint clip_func = 0xff;
 module_param(clip_func, uint, 0664);
 MODULE_PARM_DESC(clip_func, "\n clip_func_debug\n");
@@ -3182,7 +3186,7 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 			chip_type_id != chip_t5m) {
 			if (chip_type_id < chip_t3x)
 				VSYNC_WRITE_VPP_REG_VPP_SEL(VPP_WRAP_OSD1_MATRIX_EN_CTRL, 0, vpp_sel);
-			if (!is_amdv_on())
+			if (!is_amdv_on() || osd_pq_bypass)
 				hdr_process_select |= RGB_OSD;
 		}
 
@@ -3258,7 +3262,8 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 		   hdr_process_select & HLG_BYPASS ||
 		   hdr_process_select & CUVA_BYPASS ||
 		   hdr_process_select & CUVAHLG_HLG ||
-		   hdr_process_select & CUVAHLG_CUVA) {
+		   hdr_process_select & CUVAHLG_CUVA ||
+		   (module_sel == OSD1_HDR && osd_pq_bypass)) {
 		for (i = 0; i < HDR2_OETF_LUT_SIZE; i++) {
 			hdr_lut_param.oetf_lut[i] = oe_y_lut_bypass[i];
 			hdr_lut_param.ogain_lut[i] = oo_y_lut_bypass[i];
