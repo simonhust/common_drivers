@@ -796,6 +796,10 @@ static bool osd_pq_bypass;
 module_param(osd_pq_bypass, bool, 0664);
 MODULE_PARM_DESC(osd_pq_bypass, "\n osd_pq_bypass\n");
 
+static bool osd1_hdr_mode;
+module_param(osd1_hdr_mode, bool, 0664);
+MODULE_PARM_DESC(osd1_hdr_mode, "\n osd1_hdr_mode\n");
+
 static uint clip_func = 0xff;
 module_param(clip_func, uint, 0664);
 MODULE_PARM_DESC(clip_func, "\n clip_func_debug\n");
@@ -3186,7 +3190,7 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 			chip_type_id != chip_t5m) {
 			if (chip_type_id < chip_t3x)
 				VSYNC_WRITE_VPP_REG_VPP_SEL(VPP_WRAP_OSD1_MATRIX_EN_CTRL, 0, vpp_sel);
-			if (!is_amdv_on() || osd_pq_bypass)
+			if (!is_amdv_on() || osd_pq_bypass || osd1_hdr_mode)
 				hdr_process_select |= RGB_OSD;
 		}
 
