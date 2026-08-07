@@ -3731,7 +3731,7 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 		    hdr_process_select & CUVAHLG_HLG ||
 		    hdr_process_select & CUVAHLG_CUVA)) {
 		/* sdr process, always rgb osd here*/
-		if (hdr_process_select & RGB_OSD) {
+		if ((hdr_process_select & RGB_OSD) && !osd1_hdr_mode) {
 			pr_csc(128, "%s: RGB_OSD HDR_BYPASS, hdr_process_select = %x\n",
 				__func__, hdr_process_select);
 			pr_csc(128, "%s: RGB_OSD HDR_BYPASS, module_sel = %d\n",
