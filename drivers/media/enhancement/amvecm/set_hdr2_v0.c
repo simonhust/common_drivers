@@ -5513,7 +5513,7 @@ static int create_hdr_full_setting(enum hdr_module_sel module_sel,
 	if ((module_sel == OSD1_HDR || module_sel == OSD2_HDR ||
 		module_sel == OSD3_HDR) &&
 	    cpu_after_eq(MESON_CPU_MAJOR_ID_G12A)) {
-		if (!is_amdv_on())
+		if (!is_amdv_on() || osd_pq_bypass || osd1_hdr_mode)
 			hdr_process_select |= RGB_OSD;
 
 		/*for g12a/g12b osd blend shift rtl bug*/
