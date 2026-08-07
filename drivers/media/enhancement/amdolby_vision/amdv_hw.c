@@ -6510,3 +6510,29 @@ MODULE_PARM_DESC(bypass_core1a_composer, "\n bypass_core1a_composer\n");
 module_param(bypass_core1b_composer, uint, 0664);
 MODULE_PARM_DESC(bypass_core1b_composer, "\n bypass_core1b_composer\n");
 
+static bool osd_bypass_enable;
+static int param_set_osd_bypass_enable(const char *val,
+					const struct kernel_param *kp)
+{
+	bool enable;
+	int ret = kstrtobool(val, &enable);
+	if (ret)
+		return ret;
+
+	osd_bypass(enable ? 1 : 0);
+	osd_bypass_enable = enable;
+	return 0;
+}
+
+static const struct kernel_param_ops osd_bypass_enable_ops = {
+	.set = param_set_osd_bypass_enable,
+	.get = param_get_bool,
+};
+module_param_cb(osd_bypass_enable, &osd_bypass_enable_ops, &osd_bypass_enable, 0664);
+MODULE_PARM_DESC(osd_bypass_enable,
+	"\n osd_bypass_enable\n"
+	"\n When set, the DV core bypasses its OSD1 processing (EOTF, matrix,"
+	"\n control) so the OSD plane is handled solely by the amvecm HDR2"
+	"\n pipeline. Prevents color corruption (saturation=0) when SDR OSD"
+	"\n data is mixed with DV content.");
+
