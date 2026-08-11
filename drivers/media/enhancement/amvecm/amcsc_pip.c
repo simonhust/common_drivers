@@ -2567,7 +2567,7 @@ void hdmi_packet_process(int signal_change_flag,
 				vpp_index);
 		} else if (vdev->fresh_tx_cuva_hdr_vsif &&
 			vdev->fresh_tx_cuva_hdr_vs_emds) {
-			if (vinfo->hdr_info.cuva_info.monitor_mode_sup == 1)
+			if (cuva_use_vsif(vinfo))
 				vdev->fresh_tx_cuva_hdr_vsif(NULL);
 			else
 				vdev->fresh_tx_cuva_hdr_vs_emds(NULL);
@@ -2717,7 +2717,7 @@ void hdmi_packet_process(int signal_change_flag,
 				(void *)&send_info,
 				vpp_index);
 		} else {
-			if (vinfo->hdr_info.cuva_info.monitor_mode_sup == 1) {
+			if (cuva_use_vsif(vinfo)) {
 				if (vdev->fresh_tx_cuva_hdr_vsif)
 					vdev->fresh_tx_cuva_hdr_vsif(hdmitx_vsif_param);
 			} else {

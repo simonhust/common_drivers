@@ -292,6 +292,10 @@ void update_hdr10_plus_pkt(bool enable,
 void send_hdr10_plus_pkt(enum vd_path_e vd_path, enum vpp_index_e vpp_index);
 void send_cuva_pkt(enum vd_path_e vd_path, enum vpp_index_e vpp_index);
 
+/* CUVA passthrough delivery selection: 0 auto (EDID monitor_mode_sup),
+ * 1 force VSIF, 2 force EMDS */
+bool cuva_use_vsif(const struct vinfo_s *vinfo);
+
 #define HDRPLUS_PKT_UPDATE	2
 #define HDRPLUS_PKT_REPEAT	1
 #define HDRPLUS_PKT_IDLE	0
