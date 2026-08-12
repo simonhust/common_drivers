@@ -9271,6 +9271,21 @@ int amvecm_matrix_process(struct vframe_s *vf,
 						 get_current_vinfo(),
 						 NULL, vpp_index);
 				}
+
+				/*
+				 * Route the OSD planes through the same SDR->HDR
+				 * conversion as HDR10. The DV core is bypassed for
+				 * OSD (osd_bypass_enable), so the amvecm HDR2 core
+				 * must convert the sRGB OSD content to the PQ output
+				 * domain here; otherwise the OSD stays unconverted
+				 * and is misinterpreted on the DV/HDR sink.
+				 */
+				hdr_func(OSD1_HDR, SDR_HDR | hdr_ex,
+					 get_current_vinfo(), NULL, vpp_index);
+				hdr_func(OSD2_HDR, SDR_HDR | hdr_ex,
+					 get_current_vinfo(), NULL, vpp_index);
+				hdr_func(OSD3_HDR, SDR_HDR | hdr_ex,
+					 get_current_vinfo(), NULL, vpp_index);
 			}
 			dovi_on = true;
 			if (video_process_status[vd_path]
