@@ -3898,9 +3898,9 @@ static void osd_bypass(int bypass)
 		VSYNC_WR_DV_REG_BITS(VIU_OSD1_CTRL_STAT, 0, 3, 1);
 		VSYNC_WR_DV_REG_BITS(VPP_MATRIX_CTRL, 0, 7, 1);
 	} else {
-		VSYNC_WR_DV_REG(VPP_MATRIX_CTRL, osd_backup_mtx);
-		VSYNC_WR_DV_REG(VIU_OSD1_CTRL_STAT, osd_backup_ctrl);
-		VSYNC_WR_DV_REG(VIU_OSD1_EOTF_CTL, osd_backup_eotf);
+		VSYNC_WR_DV_REG_BITS(VPP_MATRIX_CTRL, (osd_backup_mtx >> 7) & 1, 7, 1);
+		VSYNC_WR_DV_REG_BITS(VIU_OSD1_CTRL_STAT, (osd_backup_ctrl >> 3) & 1, 3, 1);
+		VSYNC_WR_DV_REG_BITS(VIU_OSD1_EOTF_CTL, (osd_backup_eotf >> 31) & 1, 31, 1);
 	}
 }
 
