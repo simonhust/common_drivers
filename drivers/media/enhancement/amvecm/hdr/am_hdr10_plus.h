@@ -152,5 +152,6 @@ extern struct vframe_hdr_plus_sei hdr_plus_sei;
 void cuva_hdr_vsif_pkt_update(struct cuva_hdr_vsif_para *vsif_para);
 void cuva_hdr_emds_pkt_update(struct cuva_hdr_vs_emds_para *edms_para);
 extern struct cuva_hdr_dynamic_metadata_s cuva_metadata;
+void cuva_hdr_metadata_parse(char *metadata, uint32_t size);
 #endif /* AM_HDR_H */
 #endif
