@@ -1229,6 +1229,23 @@ static ssize_t amvecm_enable_hdr10plus_show
 	return sprintf(buf, "%d\n", enable_hdr10plus);
 }
 
+static ssize_t amvecm_cuva_sei_store
+	(struct class *cla, struct class_attribute *attr,
+	 const char *buf, size_t count)
+{
+	/* Accept raw CUVA HDR Vivid T.35 SEI bytes (starting from
+	 * country_code 0x26). Feeds into the same metadata parser
+	 * (cuva_hdr_metadata_parse) that the ucode aux path uses for
+	 * HDR10+ and Vivid — same function, same global cuva_metadata,
+	 * driving cuva_tm_func and update_cuva_pkt for VSIF/EMDS. */
+	if (!buf || !count)
+		return -EINVAL;
+	if (count > 4096)
+		return -E2BIG;
+	cuva_hdr_metadata_parse((char *)buf, (uint32_t)count);
+	return count;
+}
+
 /* #endif */
 
 unsigned int pr_hist;
@@ -13618,6 +13635,8 @@ static struct class_attribute amvecm_class_attrs[] = {
 		amvecm_ble_whe_dbg_store),
 	__ATTR(enable_hdr10plus, 0644,
 		amvecm_enable_hdr10plus_show, NULL),
+	__ATTR(cuva_sei, 0200,
+	       NULL, amvecm_cuva_sei_store),
 #endif
 	__ATTR_NULL
 };
