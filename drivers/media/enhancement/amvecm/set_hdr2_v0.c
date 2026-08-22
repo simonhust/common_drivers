@@ -3274,6 +3274,10 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 		   hdr_process_select & CUVAHLG_CUVA ||
 		   (module_sel == OSD1_HDR && osd_pq_bypass) ||
 		   (module_sel == OSD1_HDR && osd1_hdr_mode)) {
+		pr_csc(1, "HDR_BYPASS LUT: module=%d proc_sel=0x%x osd_gamut_bypass=%d osd_pq_bypass=%d osd1_hdr_mode=%d amdv=%d\n",
+		       module_sel, hdr_process_select,
+		       osd_gamut_bypass, osd_pq_bypass, osd1_hdr_mode,
+		       is_amdv_on());
 		for (i = 0; i < HDR2_OETF_LUT_SIZE; i++) {
 			hdr_lut_param.oetf_lut[i] = oe_y_lut_bypass[i];
 			hdr_lut_param.ogain_lut[i] = oo_y_lut_bypass[i];
@@ -3340,6 +3344,10 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 		hdr_lut_param.hist_en = LUT_ON;
 	} else if (hdr_process_select & SDR_HDR ||
 		hdr_process_select & SDR_CUVA) {
+		pr_csc(1, "SDR_HDR LUT: module=%d proc_sel=0x%x osd_gamut_bypass=%d osd_pq_bypass=%d osd1_hdr_mode=%d amdv=%d\n",
+		       module_sel, hdr_process_select,
+		       osd_gamut_bypass, osd_pq_bypass, osd1_hdr_mode,
+		       is_amdv_on());
 		if (chip_cls_id == TV_CHIP &&
 			module_sel == VD1_HDR) {
 			for (i = 0; i < HDR2_OETF_LUT_SIZE; i++) {

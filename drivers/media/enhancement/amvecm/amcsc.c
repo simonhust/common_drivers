@@ -5975,6 +5975,9 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 		if (csc_type == VPP_MATRIX_BT2020YUV_BT2020RGB &&
 		    ((sink_hdr_support(vinfo) & (HDR_SUPPORT | HLG_SUPPORT)) &&
 		     !vinfo_lcd_support())) {
+			pr_csc(1, "bypass_hdr OSD: path=B1(SDR_HDR/HLG) sink_hdr=0x%x lcd=%d csc=%d hdr_type=0x%x cpu=%d\n",
+			       sink_hdr_support(vinfo), vinfo_lcd_support(),
+			       csc_type, get_hdr_type(), get_cpu_type());
 			if (get_hdr_type() & HLG_FLAG) {
 				hdr_func(OSD1_HDR,
 					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
@@ -5992,6 +5995,9 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 			}
 			pr_csc(1, "\t osd sdr->hdr/hlg\n");
 		} else {
+			pr_csc(1, "bypass_hdr OSD: path=B2(HDR_BYPASS) sink_hdr=0x%x lcd=%d csc=%d hdr_type=0x%x cpu=%d\n",
+			       sink_hdr_support(vinfo), vinfo_lcd_support(),
+			       csc_type, get_hdr_type(), get_cpu_type());
 			hdr_func(OSD1_HDR, HDR_BYPASS | hdr_ex, vinfo, NULL, vpp_index);
 			hdr_func(OSD2_HDR, HDR_BYPASS | hdr_ex, vinfo, NULL, vpp_index);
 			hdr_func(OSD3_HDR, HDR_BYPASS | hdr_ex, vinfo, NULL, vpp_index);
@@ -7277,6 +7283,11 @@ static void hdr_support_process(struct vinfo_s *vinfo,
 		/* force sdr->hdr */
 		sdr_process_mode[vd_path] = sdr_mode;
 	}
+
+	pr_csc(1, "hdr_support_process: vd_path=%d hdr_mode=%d sink_hdr=0x%x hdr_proc=%d hlg_proc=%d sdr_proc=%d\n",
+	       vd_path, hdr_mode, sink_hdr_support(vinfo),
+	       hdr_process_mode[vd_path], hlg_process_mode[vd_path],
+	       sdr_process_mode[vd_path]);
 }
 
 static int sink_support_dv(const struct vinfo_s *vinfo)
