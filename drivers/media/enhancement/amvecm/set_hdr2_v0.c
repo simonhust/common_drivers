@@ -3195,7 +3195,7 @@ enum hdr_process_sel hdr_func(enum hdr_module_sel module_sel,
 			chip_type_id != chip_t5m) {
 			if (chip_type_id < chip_t3x)
 				VSYNC_WRITE_VPP_REG_VPP_SEL(VPP_WRAP_OSD1_MATRIX_EN_CTRL, 0, vpp_sel);
-			if (!is_amdv_on() || osd_pq_bypass || osd1_hdr_mode)
+			if (!is_amdv_on() || osd_pq_bypass || osd_gamut_bypass || osd1_hdr_mode)
 				hdr_process_select |= RGB_OSD;
 		}
 
@@ -4850,7 +4850,7 @@ enum hdr_process_sel hdr10p_func(enum hdr_module_sel module_sel,
 		if (!osd_pic_en ||
 			chip_type_id != chip_t5m) {
 			VSYNC_WRITE_VPP_REG_VPP_SEL(VPP_WRAP_OSD1_MATRIX_EN_CTRL, 0, 0);
-			if (!is_amdv_on())
+			if (!is_amdv_on() || osd_pq_bypass || osd_gamut_bypass)
 				hdr_process_select |= RGB_OSD;
 		}
 	}
@@ -5525,7 +5525,7 @@ static int create_hdr_full_setting(enum hdr_module_sel module_sel,
 	if ((module_sel == OSD1_HDR || module_sel == OSD2_HDR ||
 		module_sel == OSD3_HDR) &&
 	    cpu_after_eq(MESON_CPU_MAJOR_ID_G12A)) {
-		if (!is_amdv_on() || osd_pq_bypass || osd1_hdr_mode)
+		if (!is_amdv_on() || osd_pq_bypass || osd_gamut_bypass || osd1_hdr_mode)
 			hdr_process_select |= RGB_OSD;
 
 		/*for g12a/g12b osd blend shift rtl bug*/
