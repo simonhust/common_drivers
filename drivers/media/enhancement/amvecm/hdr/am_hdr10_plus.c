@@ -531,6 +531,11 @@ void cuva_hdr_metadata_parse(char *metadata, uint32_t size)
 	}
 	pr_hdr("cuva metadata print end\n");
 
+	/* skip the 5 byte T.35 header (country + provider + oriented);
+	 * a shorter write would wrap the u32 size */
+	if (size < 5)
+		return;
+
 	metadata += 5;
 	size -= 5;
 

@@ -7891,7 +7891,9 @@ void update_hdr10_plus_pkt(bool enable,
 	else
 		vinfo = get_current_vinfo();
 
-	if (vinfo && vinfo->mode != VMODE_HDMI)
+	/* vinfo can be NULL during display mode switch / unplug; this runs in
+	 * vsync IRQ context, a NULL deref panics */
+	if (!vinfo || vinfo->mode != VMODE_HDMI)
 		return;
 
 	if (vinfo->vout_device) {
@@ -7956,7 +7958,9 @@ void update_cuva_pkt(bool enable,
 	else
 		vinfo = get_current_vinfo();
 
-	if (vinfo && vinfo->mode != VMODE_HDMI)
+	/* vinfo can be NULL during display mode switch / unplug; this runs in
+	 * vsync IRQ context, a NULL deref panics */
+	if (!vinfo || vinfo->mode != VMODE_HDMI)
 		return;
 
 	if (vinfo->vout_device) {
@@ -8023,7 +8027,9 @@ void send_hdr10_plus_pkt(enum vd_path_e vd_path,
 	else
 		vinfo = get_current_vinfo();
 
-	if (vinfo && vinfo->mode != VMODE_HDMI)
+	/* vinfo can be NULL during display mode switch / unplug; this runs in
+	 * vsync IRQ context, a NULL deref panics */
+	if (!vinfo || vinfo->mode != VMODE_HDMI)
 		return;
 
 	if (vinfo->vout_device) {
@@ -8073,7 +8079,9 @@ void send_cuva_pkt(enum vd_path_e vd_path,
 	else
 		vinfo = get_current_vinfo();
 
-	if (vinfo && vinfo->mode != VMODE_HDMI)
+	/* vinfo can be NULL during display mode switch / unplug; this runs in
+	 * vsync IRQ context, a NULL deref panics */
+	if (!vinfo || vinfo->mode != VMODE_HDMI)
 		return;
 
 	if (vinfo->vout_device) {

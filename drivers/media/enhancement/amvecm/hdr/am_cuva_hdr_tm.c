@@ -280,7 +280,9 @@ static void get_cuva_tm_maxl(enum cuva_func_e tm_func,
 	switch (tm_func) {
 	case CUVA_HDR2SDR:
 	case CUVA_HLG2SDR:
-		if (vinfo->hdr_info.lumi_max >= 150) /*support lowest panel 150nit*/
+		/* vinfo can be NULL during display mode switch / unplug;
+		 * this runs in vsync IRQ context, a NULL deref panics */
+		if (vinfo && vinfo->hdr_info.lumi_max >= 150) /*support lowest panel 150nit*/
 			maxl = vinfo->hdr_info.lumi_max;
 
 		minl = 64; /*e domin 64 : minl = 0.1*/
