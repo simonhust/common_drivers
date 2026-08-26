@@ -5972,9 +5972,16 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 				 vinfo,
 				 gamut_conv_enable ? &m : NULL,
 				 vpp_index);
-		if (csc_type == VPP_MATRIX_BT2020YUV_BT2020RGB &&
-		    ((sink_hdr_support(vinfo) & (HDR_SUPPORT | HLG_SUPPORT)) &&
-		     !vinfo_lcd_support())) {
+		if (csc_type == VPP_MATRIX_BT2020YUV_BT2020RGB) {
+			/* OSD is always routed to the HDR2 core for the
+			 * sRGB->PQ (or sRGB->HLG) transfer when the video
+			 * layer is BT.2020, regardless of sink capability:
+			 * the userspace keeps GUI and PGS as sRGB BT.709 and
+			 * relies on the HDR2 core to do the full
+			 * 709->2020 gamut + transfer. On an SDR sink this
+			 * still runs so the composited BT.709 OSD matches the
+			 * BT.2020 video tone mapping.
+			 */
 			if (get_hdr_type() & HLG_FLAG) {
 				hdr_func(OSD1_HDR,
 					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
@@ -5986,9 +5993,9 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 				hdr_func(OSD1_HDR,
 					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 				hdr_func(OSD2_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 				hdr_func(OSD3_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
 			}
 			pr_csc(1, "\t osd sdr->hdr/hlg\n");
 		} else {
