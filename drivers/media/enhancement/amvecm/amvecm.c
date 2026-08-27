@@ -1229,6 +1229,25 @@ static ssize_t amvecm_enable_hdr10plus_show
 	return sprintf(buf, "%d\n", enable_hdr10plus);
 }
 
+static ssize_t amvecm_enable_hdr10plus_store
+	(struct class *cla,
+	 struct class_attribute *attr,
+	 const char *buf, size_t count)
+{
+	bool enable;
+	int ret = kstrtobool(buf, &enable);
+
+	if (ret)
+		return ret;
+
+	/* Enable/disable HDR10+ dynamic metadata handling. Kodi arms this
+	 * per playback start, so it self-heals after reboot. */
+	enable_hdr10plus = enable;
+	pr_info("enable_hdr10plus =%d\n", enable_hdr10plus);
+
+	return count;
+}
+
 /* #endif */
 
 unsigned int pr_hist;
@@ -13617,7 +13636,8 @@ static struct class_attribute amvecm_class_attrs[] = {
 		amvecm_ble_whe_dbg_show,
 		amvecm_ble_whe_dbg_store),
 	__ATTR(enable_hdr10plus, 0644,
-		amvecm_enable_hdr10plus_show, NULL),
+		amvecm_enable_hdr10plus_show,
+		amvecm_enable_hdr10plus_store),
 #endif
 	__ATTR_NULL
 };
