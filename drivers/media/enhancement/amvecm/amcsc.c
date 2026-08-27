@@ -5972,32 +5972,47 @@ static void bypass_hdr_process(enum vpp_matrix_csc_e csc_type,
 				 vinfo,
 				 gamut_conv_enable ? &m : NULL,
 				 vpp_index);
-		if (csc_type == VPP_MATRIX_BT2020YUV_BT2020RGB) {
-			/* OSD is always routed to the HDR2 core for the
-			 * sRGB->PQ (or sRGB->HLG) transfer when the video
-			 * layer is BT.2020, regardless of sink capability:
-			 * the userspace keeps GUI and PGS as sRGB BT.709 and
-			 * relies on the HDR2 core to do the full
-			 * 709->2020 gamut + transfer. On an SDR sink this
-			 * still runs so the composited BT.709 OSD matches the
-			 * BT.2020 video tone mapping.
+		if (csc_type == VPP_MATRIX_BT2020YUV_BT2020RGB &&
+		    ((sink_hdr_support(vinfo) &
+		    (HDR_SUPPORT | HLG_SUPPORT)) &&
+		    (!vinfo_lcd_support()))) {
+			/*
+			 * HDR/HLG video on an HDR sink: the compositor already
+			 * pre-renders the OSD plane into the HDR domain (the GLES
+			 * GUI shader does the full sRGB->linear->BT.2020->PQ
+			 * conversion when the output is HDR), so the kernel must
+			 * pass the OSD through untouched (HDR_BYPASS). Only
+			 * SDR-source video on an HDR sink gets the kernel-side
+			 * SDR->HDR/HLG conversion of the OSD.
 			 */
-			if (get_hdr_type() & HLG_FLAG) {
-				hdr_func(OSD1_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
-				hdr_func(OSD2_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
-				hdr_func(OSD3_HDR,
-					 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+			if (source_type &&
+			    source_type[vd_path] != HDRTYPE_SDR &&
+			    source_type[vd_path] != HDRTYPE_SDR2020) {
+				hdr_func(OSD1_HDR, HDR_BYPASS | hdr_ex,
+					 vinfo, NULL, vpp_index);
+				hdr_func(OSD2_HDR, HDR_BYPASS | hdr_ex,
+					 vinfo, NULL, vpp_index);
+				hdr_func(OSD3_HDR, HDR_BYPASS | hdr_ex,
+					 vinfo, NULL, vpp_index);
+				pr_csc(1, "\t osd hdr_bypass (hdr/hlg video)\n");
 			} else {
-				hdr_func(OSD1_HDR,
-					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
-				hdr_func(OSD2_HDR,
-					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
-				hdr_func(OSD3_HDR,
-					 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
+				if (get_hdr_type() & HLG_FLAG) {
+					hdr_func(OSD1_HDR,
+						 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					hdr_func(OSD2_HDR,
+						 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+					hdr_func(OSD3_HDR,
+						 SDR_HLG | hdr_ex, vinfo, NULL, vpp_index);
+				} else {
+					hdr_func(OSD1_HDR,
+						 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
+					hdr_func(OSD2_HDR,
+						 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
+					hdr_func(OSD3_HDR,
+						 SDR_HDR | hdr_ex, vinfo, NULL, vpp_index);
+				}
+				pr_csc(1, "\t osd sdr->hdr/hlg\n");
 			}
-			pr_csc(1, "\t osd sdr->hdr/hlg\n");
 		} else {
 			hdr_func(OSD1_HDR, HDR_BYPASS | hdr_ex, vinfo, NULL, vpp_index);
 			hdr_func(OSD2_HDR, HDR_BYPASS | hdr_ex, vinfo, NULL, vpp_index);
@@ -9280,19 +9295,12 @@ int amvecm_matrix_process(struct vframe_s *vf,
 				}
 
 				/*
-				 * Route the OSD planes through the same SDR->HDR
-				 * conversion as HDR10. The DV core is bypassed for
-				 * OSD (osd_bypass_enable), so the amvecm HDR2 core
-				 * must convert the sRGB OSD content to the PQ output
-				 * domain here; otherwise the OSD stays unconverted
-				 * and is misinterpreted on the DV/HDR sink.
+				 * DV core owns the video; the OSD plane is
+				 * pre-rendered by the compositor (GLES sRGB->PQ
+				 * shader) and must pass through the HDR2 block
+				 * unconverted (HDR_BYPASS), mirroring the HDR10
+				 * path. No SDR->HDR conversion is applied here.
 				 */
-				hdr_func(OSD1_HDR, SDR_HDR | hdr_ex,
-					 get_current_vinfo(), NULL, vpp_index);
-				hdr_func(OSD2_HDR, SDR_HDR | hdr_ex,
-					 get_current_vinfo(), NULL, vpp_index);
-				hdr_func(OSD3_HDR, SDR_HDR | hdr_ex,
-					 get_current_vinfo(), NULL, vpp_index);
 			}
 			dovi_on = true;
 			if (video_process_status[vd_path]
