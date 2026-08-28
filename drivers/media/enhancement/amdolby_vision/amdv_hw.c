@@ -127,10 +127,29 @@ struct vpp_post_info_t core3_slice_info;
  */
 static int (*get_osd_status)(u32 index);
 
+/* OSD ownership handed to the amvecm HDR2 core: on S5 the DV core2
+ * instances are per-OSD (OSD_DOLBY_BYPASS_EN bits 0/4) and can be gated
+ * individually when osd_bypass_enable is set. On every other STB SoC
+ * (g12/sc2/s4d/s7d/s6/t7) core2a carries the VIDEO EL path
+ * (AMDV_PATH_CTRL bit2) - dv_core2a_set drives SWAP_CTRL0 bit0 from
+ * get_core2_enable_info(), so returning false there would kill the whole
+ * core2 engine and black out DV output; do not extend this gate beyond S5.
+ */
+static bool osd_bypass_enable;
+
+bool amdv_osd_bypass_enabled(void)
+{
+	return osd_bypass_enable;
+}
+EXPORT_SYMBOL(amdv_osd_bypass_enabled);
+
 bool get_core2_enable_info(u32 index)
 {
 	bool osd_enable = (amdv_mask & 2);
 	int osd_status = 0;
+
+	if (osd_bypass_enable && is_aml_s5())
+		return false;
 
 	if (is_aml_s5() && get_osd_status) {
 		osd_status = get_osd_status(index);
@@ -3726,8 +3745,9 @@ void apply_stb_core_settings(dma_addr_t dma_paddr,
 			       sizeof(struct dm_lut_ipcore));
 
 		osd_enable[0] = get_core2_enable_info(OSD1_INDEX);
-		osd_enable[1] = get_core2_enable_info(OSD3_INDEX) ||
-						(force_core2c_on && (core2_sel & 2));
+		osd_enable[1] = !osd_bypass_enable &&
+						(get_core2_enable_info(OSD3_INDEX) ||
+						(force_core2c_on && (core2_sel & 2)));
 
 		dv_core2a_set
 			(24, 256 * 5,
@@ -4639,19 +4659,21 @@ void enable_amdv_v1(int enable)
 						(VPP_AMDV_CTRL,
 						 0, 3, 1);   /* bypass core3  */
 
-					if ((amdv_mask & 2) && (core2_sel & 1)) {
+					if ((amdv_mask & 2) && (core2_sel & 1) &&
+					    !osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD_TOP_CTRL,
 							 0,
 							 14, 1);/*core2a enable*/
 					}
-					if ((amdv_mask & 2) && (core2_sel & 2)) {
+					if ((amdv_mask & 2) && (core2_sel & 2) &&
+					    !osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD1_TOP_CTRL,
 							 0,
 							 19, 1);/*core2c enable*/
 					}
-					if (!(amdv_mask & 2)) {
+					if (!(amdv_mask & 2) || osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD_TOP_CTRL,
 							 1,
@@ -4691,8 +4713,9 @@ void enable_amdv_v1(int enable)
 							 1,
 							 0, 1);/*core2a bypass*/
 					}
-					if (get_core2_enable_info(OSD3_INDEX) ||
-						(force_core2c_on && (core2_sel & 2))) {
+					if (!osd_bypass_enable &&
+						(get_core2_enable_info(OSD3_INDEX) ||
+						(force_core2c_on && (core2_sel & 2)))) {
 						pr_info("enable core2c\n");
 						VSYNC_WR_DV_REG_BITS
 							(OSD_DOLBY_BYPASS_EN,
@@ -5594,7 +5617,7 @@ void enable_amdv_v1(int enable)
 		set_vf_crc_valid(0);
 		reset_dv_param();
 		clear_dolby_vision_wait();
-		if (!is_aml_gxm() && !is_aml_txlx()) {
+		if (!is_aml_gxm() && !is_aml_txlx() && !osd_bypass_enable) {
 			hdr_osd_off(VPP_TOP0);
 			hdr_vd1_off(VPP_TOP0);
 		}
@@ -5637,7 +5660,8 @@ void enable_amdv_v2_stb(int enable)
 		if (!dolby_vision_on) {
 			set_amdv_wait_on();
 			if (is_amdv_stb_mode()) {
-				hdr_osd_off(VPP_TOP0);
+				if (!osd_bypass_enable)
+					hdr_osd_off(VPP_TOP0);
 				hdr_vd1_off(VPP_TOP0);
 				set_hdr_module_status(VD1_PATH,
 					HDR_MODULE_BYPASS);
@@ -5652,19 +5676,21 @@ void enable_amdv_v2_stb(int enable)
 						(VPP_AMDV_CTRL,
 						 0, 3, 1);   /* bypass core3  */
 
-					if ((amdv_mask & 2) && (core2_sel & 1)) {
+					if ((amdv_mask & 2) && (core2_sel & 1) &&
+					    !osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD_TOP_CTRL,
 							 0,
 							 14, 1);/*core2a enable*/
 					}
-					if ((amdv_mask & 2) && (core2_sel & 2)) {
+					if ((amdv_mask & 2) && (core2_sel & 2) &&
+					    !osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD1_TOP_CTRL,
 							 0,
 							 19, 1);/*core2c enable*/
 					}
-					if (!(amdv_mask & 2)) {
+					if (!(amdv_mask & 2) || osd_bypass_enable) {
 						VSYNC_WR_DV_REG_BITS
 							(MALI_AFBCD_TOP_CTRL,
 							 1,
@@ -5704,8 +5730,9 @@ void enable_amdv_v2_stb(int enable)
 							 1,
 							 0, 1);/*core2a bypass*/
 					}
-					if (get_core2_enable_info(OSD3_INDEX) ||
-						(force_core2c_on && (core2_sel & 2))) {
+					if (!osd_bypass_enable &&
+						(get_core2_enable_info(OSD3_INDEX) ||
+						(force_core2c_on && (core2_sel & 2)))) {
 						pr_info("enable core2c\n");
 						VSYNC_WR_DV_REG_BITS
 							(OSD_DOLBY_BYPASS_EN,
@@ -6434,7 +6461,7 @@ void enable_amdv_v2_stb(int enable)
 		force_reset_core2[1] = true;
 		reset_dv_param();
 		clear_dolby_vision_wait();
-		if (!is_aml_gxm() && !is_aml_txlx()) {
+		if (!is_aml_gxm() && !is_aml_txlx() && !osd_bypass_enable) {
 			hdr_osd_off(VPP_TOP0);
 			hdr_vd1_off(VPP_TOP0);
 		}
@@ -6510,7 +6537,6 @@ MODULE_PARM_DESC(bypass_core1a_composer, "\n bypass_core1a_composer\n");
 module_param(bypass_core1b_composer, uint, 0664);
 MODULE_PARM_DESC(bypass_core1b_composer, "\n bypass_core1b_composer\n");
 
-static bool osd_bypass_enable;
 static int param_set_osd_bypass_enable(const char *val,
 					const struct kernel_param *kp)
 {

@@ -13922,14 +13922,16 @@ bool is_amdv_graphic_on(void)
 {
 	/* TODO: check (core2_sel & 2) for core2c */
 	return is_amdv_on() && !tv_mode &&
-		(amdv_mask & 2) && (core2_sel & 1);
+		(amdv_mask & 2) && (core2_sel & 1) &&
+		!amdv_osd_bypass_enabled();
 }
 EXPORT_SYMBOL(is_amdv_graphic_on);
 
 bool is_amdv_graphic_on_osd3(void)
 {
 	return is_amdv_on() && !tv_mode &&
-		(amdv_mask & 2) && (core2_sel & 2);
+		(amdv_mask & 2) && (core2_sel & 2) &&
+		!amdv_osd_bypass_enabled();
 }
 EXPORT_SYMBOL(is_amdv_graphic_on_osd3);
 
