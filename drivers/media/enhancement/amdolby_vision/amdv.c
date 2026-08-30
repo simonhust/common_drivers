@@ -115,6 +115,11 @@ MODULE_PARM_DESC(dolby_vision_level, "\n dolby_vision_level\n");
 static unsigned int primary_debug;
 module_param(primary_debug, uint, 0664);
 MODULE_PARM_DESC(primary_debug, "\n primary_debug\n");
+
+bool aml_linux_osd_sdr8 = true;
+module_param(aml_linux_osd_sdr8, bool, 0664);
+MODULE_PARM_DESC(aml_linux_osd_sdr8, "\n aml_linux_osd_sdr8\n");
+
 /* STB: if sink support DV, always output DV*/
 /*		else always output SDR/HDR */
 /* TV:  when source is DV/HDR10/HLG, convert to SDR */
@@ -9095,8 +9100,16 @@ int amdv_parse_metadata_v1(struct vframe_s *vf,
 		new_dovi_setting.dovi2hdr10_nomapping = 0;
 
 	/* always use rgb setting */
-	new_dovi_setting.g_bitdepth = 8;
-	new_dovi_setting.g_format = G_SDR_RGB;
+	if (aml_linux_osd_sdr8)
+	{
+		new_dovi_setting.g_bitdepth = 8;
+		new_dovi_setting.g_format = G_SDR_RGB;
+	}
+	else
+	{
+		new_dovi_setting.g_bitdepth = 10;
+		new_dovi_setting.g_format = G_HDR_RGB;
+	}
 
 	new_dovi_setting.diagnostic_enable = 0;
 	new_dovi_setting.diagnostic_mux_select = 0;
